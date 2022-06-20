@@ -99,3 +99,34 @@ for (let event in timeline) {
 }
 
 console.log(timeline)
+
+function addZ(n){return n<10? '0'+n:''+n;}
+
+function stamp_date(date) {
+  var d = date
+  let year = d.getFullYear(),
+      month = addZ(d.getMonth()+1),
+      day = addZ(d.getDate()),
+      day_name = d.toString().split(' ')[0],
+      hour = addZ(d.getHours()),
+      min = addZ(d.getMinutes())
+  return `<${year}-${month}-${day} ${day_name} ${hour}:${min}>`
+}
+
+function orgify_event(event) { // generates event heading
+  var r = `* TODO ${event[0]}
+SCHEDULED: ${stamp_date(event[1])}`
+  return r
+}
+
+function generate_org_markdown(line) { // line should be the timeline var
+  var agenda = ""
+  for (let event in timeline) {
+    event = timeline[event]
+    console.log(event)
+    agenda+="\n"+orgify_event(event)
+  }
+  console.log(agenda)
+}
+
+generate_org_markdown(timeline)
