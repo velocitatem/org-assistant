@@ -1,3 +1,4 @@
+
 var user_input = [
   ["This", "%", "60"],
   ["Lusian Website", "%", "30"],
