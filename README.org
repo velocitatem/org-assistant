@@ -1,4 +1,6 @@
-#+title: org-asistant
+#+title: org-assistant
+
+/still under construction. Any help would be appreciated!/
 
 org-assistant is a tool to help you build your org-agenda dynamically. It takes the events for each day, aswell as their category, generates a timeline and them implements that into your org agenda.
 
@@ -11,4 +13,3 @@ org-assistant is a tool to help you build your org-agenda dynamically. It takes 
    4. Schedule is checked if it makes sense
 
 
-org assistant
