@@ -1,9 +1,12 @@
-#+title: Readme
+#+title: org-asistant
 
 * How should it work
 1. User creates a list of events and gives each event a time and duration, both can be wild-cards.
 2. Algorithm creates time-line
-   1. Starts at current time
+   1. Starts at first event
    2. All time-specific events are assigned
    3. All non-time-specific events (wild-card times) are evenly distributed
    4. Schedule is checked if it makes sense
+
+
+org assistant

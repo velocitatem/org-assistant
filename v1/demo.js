@@ -2,22 +2,30 @@ var user_input = [
   ["This", "%", "60"],
   ["Lusian Website", "%", "30"],
   ["Cooking Class", "17:30", "180"],
-  ["Dog Walk", "11:30", "25"],
+  ["Dog Walk", "13:30", "25"],
   ["Learn", "%", "45"],
   ["Lunch", "12:30", "%"]
 ]
 
-var timeline = [],
-    timed_events = [],
-    wild_events = []
 
 
+// helpers
 
 const str_to_time = (str) => {
   let time = (str).split(':');
   let now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...time);
 }
+
+function AddMinutesToDate(date, minutes) {
+  return new Date(new Date(date).getTime() + minutes * 60000);
+}
+
+
+
+var timeline = [["Start", str_to_time("09:00"), "0"]],
+    timed_events = [],
+    wild_events = []
 
 // sort events
 for (let input in user_input) {
@@ -39,7 +47,7 @@ const remove_item_from_timed_events = (event) => {
   timed_events = timed_events.slice(0, index).concat(timed_events.slice(index + 1));
 }
 
-// sort timed event list by time
+// Time specific assignment
 while(timed_events.length > 0) {
   var min_time = str_to_time("23:59"),
       min_event = null;
@@ -54,4 +62,40 @@ while(timed_events.length > 0) {
   remove_item_from_timed_events(min_event)
   timeline.push(min_event)
 }
+console.log(timeline)
+
+
+// Wildcard assignment
+
+
+// assign duration specified wildcards
+console.log(wild_events)
+var last_wildcard = 0 // a simple itterator for new wilds assignment
+// query for gaps in timline to fit wildcards
+for (let event in timeline) {
+  if (event<timeline.length-1) {
+    event = timeline[event]
+    var next_event = timeline[timeline.indexOf(event)+1]
+    var time_gap = next_event[1] - event[1]
+    time_gap /= 60000
+    let event_end_shift = parseInt(event[2])+5
+    time_gap -= event_end_shift
+    // check if wildcard would fit
+    // First check is the 0th index of the wildcards
+    var selected_wildcard = wild_events[last_wildcard]
+    if(selected_wildcard!=undefined && parseInt(selected_wildcard[2])<time_gap) {
+      console.log("gap found")
+      selected_wildcard[1] = AddMinutesToDate(event[1], event_end_shift)
+      console.log(selected_wildcard)
+      timeline.splice(timeline.indexOf(event)+1, 0, selected_wildcard)
+      last_wildcard+=1
+    }
+    console.log(time_gap)
+  }
+  else {
+    // no future event
+  }
+
+}
+
 console.log(timeline)
