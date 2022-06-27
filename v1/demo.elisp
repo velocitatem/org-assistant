@@ -1,0 +1,38 @@
+(defun read-new-event ()
+  (setq
+   event-name (read-string "Enter Event Name: ")
+   event-time (read-string (concat "When does \"" event-name "\" happen? "))
+   event-duration (read-string (concat "How long does \"" event-name "\" take? (minutes) "))
+   )
+  (list event-name event-time event-duration)
+)
+
+; (read-new-event)
+
+;; (multiple-value-bind
+;;     (second minute hour day month year day-of-week dst-p tz)
+;;   (setq now_decoded (list day month year))
+;;  )
+
+(setq user-events (list (list "Start" "00:00" "0")))
+
+
+(setq keep-reading t)
+(read-string "Let's get started with building your day [Enter to continue]")
+
+; get users input
+(while (not (equal keep-reading nil))
+  (if (not (equal (read-string "Add new event? [y/enter]: ") "y"))
+      (setq keep-reading nil)
+      (setq user-events
+            (cons read-new-event/event user-events)))
+  )
+
+
+
+(defun str_to_time (str)
+  (setq time (split-string str ":"))
+  ()
+  )
+
+
