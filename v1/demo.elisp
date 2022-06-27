@@ -18,13 +18,15 @@
 (setq keep-reading t)
 (read-string "Let's get started with building your day [Enter to continue]")
 
-; get users input
-(while (not (equal keep-reading nil))
+; get users user-event
+(while keep-reading
   (if (not (equal (read-string "Add new event? [y/enter]: ") "y"))
       (setq keep-reading nil)
       (setq user-events
-            (cons read-new-event/event user-events)))
+            (cons (read-new-event) user-events)))
   )
+(setq keep-reading t)
+
 (defun str-to-time (str)
   (setq time (split-string str ":")
         hour (cl-parse-integer (first time))
@@ -36,28 +38,28 @@
   (setq hours-from-minutes (truncate
                             (/ minutes 60))
         remaining-minutes (% minutes 60))
-  ;; (setf (nth 0 time) (% minutes 60)
-  ;;       (nth 1 time)
   (list  (+ hours-from-minutes (first time)) (+ remaining-minutes (second time)))
   )
-
-
-(add-minutes-to-time (str-to-time "17:20") 120)
 
 (setq timed-events (list)
       wild-events (list))
 
+(defun wild-events/add (user-event)
+  (setq wild-events
+        (cons user-event wild-events)) ; TODO Maybe refactor this
+  )
+(defun timed-events/add (user-event)
+  (setf (nth 1 user-event) (str-to-time (nth 1 user-event)))
+  (setq timed-events
+        (cons user-event timed-events))
+  )
 
-(loop for input in user-events do
-     (if (not (= (first input) "%"))
-         (lambda ()
-           (setf (nth 1 input) (str-to-time (nth 1 input)))
-           (setq timed-events
-                 (cons input timed-events))
-           )
-         (lambda ()
-           (setq wild-events
-                 (cons input wild-events)) ; TODO Maybe refactor this
-           )
+(loop for user-event in user-events do
+     (if (not (equal (first user-event) ""))
+         (timed-events/add user-event)
+         (wild-events/add user-event)
          )
+     )
+
+
 
