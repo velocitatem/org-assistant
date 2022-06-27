@@ -1,15 +1,13 @@
 (defun read-new-event ()
   (setq
    event-name (read-string "Enter Event Name: ")
-   event-time (read-string (concat "When does \"" event-name "\" happen? "))
+   event-time (read-string (concat "When does \"" event-name "\" happen? (hh:mm) "))
    event-duration (read-string (concat "How long does \"" event-name "\" take? (minutes) "))
    )
   (list event-name event-time event-duration)
 )
 
-; (read-new-event)
-
-;; (multiple-value-bind
+; (read-new-event) ;; (multiple-value-bind
 ;;     (second minute hour day month year day-of-week dst-p tz)
 ;;   (setq now_decoded (list day month year))
 ;;  )
@@ -27,12 +25,39 @@
       (setq user-events
             (cons read-new-event/event user-events)))
   )
-
-
-
-(defun str_to_time (str)
-  (setq time (split-string str ":"))
-  ()
+(defun str-to-time (str)
+  (setq time (split-string str ":")
+        hour (cl-parse-integer (first time))
+        minute (cl-parse-integer (second time)))
+  (list hour minute)
   )
 
+(defun add-minutes-to-time (time minutes)
+  (setq hours-from-minutes (truncate
+                            (/ minutes 60))
+        remaining-minutes (% minutes 60))
+  ;; (setf (nth 0 time) (% minutes 60)
+  ;;       (nth 1 time)
+  (list  (+ hours-from-minutes (first time)) (+ remaining-minutes (second time)))
+  )
+
+
+(add-minutes-to-time (str-to-time "17:20") 120)
+
+(setq timed-events (list)
+      wild-events (list))
+
+
+(loop for input in user-events do
+     (if (not (= (first input) "%"))
+         (lambda ()
+           (setf (nth 1 input) (str-to-time (nth 1 input)))
+           (setq timed-events
+                 (cons input timed-events))
+           )
+         (lambda ()
+           (setq wild-events
+                 (cons input wild-events)) ; TODO Maybe refactor this
+           )
+         )
 
