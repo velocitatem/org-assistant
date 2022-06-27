@@ -1,3 +1,38 @@
+;;; org-assistant.el --- org-assistant is a tool to help you build your org-agenda dynamically. It takes the events for each day, aswell as their category, generates a timeline and them implements that into your org agenda. -*- lexical-binding: t -*-
+
+    ;; Author: Daniel Rosel
+    ;; Maintainer: Daniel Rosel
+    ;; Version: 0.1.0
+    ;; Package-Requires: (cl)
+    ;; Homepage: https://github.com/velocitatem/org-assistant
+    ;; Keywords: org-agenda org-mode schedule
+
+
+    ;; This file is not part of GNU Emacs
+
+    ;; This program is free software: you can redistribute it and/or modify
+    ;; it under the terms of the GNU General Public License as published by
+    ;; the Free Software Foundation, either version 3 of the License, or
+    ;; (at your option) any later version.
+
+    ;; This program is distributed in the hope that it will be useful,
+    ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    ;; GNU General Public License for more details.
+
+    ;; You should have received a copy of the GNU General Public License
+    ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+;;; Commentary:
+
+
+;;; Code:
+
+
+(defun its 
+  (int-to-string i))
+
 (defun read-new-event ()
   (setq
    event-name (read-string "Enter Event Name: ")
@@ -7,15 +42,11 @@
   (list event-name event-time event-duration)
 )
 
-; (read-new-event) ;; (multiple-value-bind
-;;     (second minute hour day month year day-of-week dst-p tz)
-;;   (setq now_decoded (list day month year))
-;;  )
 
 (setq user-events (list (list "Start" "09:00" "0"))
       timeline (list))
 
-; pass test data
+; SAMPLE INPUT
 (setq user-events
       (list (list "Start" "09:00" "0")
             (list "Dog" "" "30")
@@ -140,3 +171,50 @@
       ))
 
 
+(defun add-z (n)
+  (if (< n 10 )
+      (concat "0" (its n))
+      (its n)))
+
+
+(defun stamp-time (time)
+  (format-time-string (concat
+   "SCHEDULED: <%Y-%m-%d %a "
+   (add-z (first time)) ":"
+   (add-z (second time)) ">"))
+   )
+
+(defun orgify-event (event)
+  (concat "* TODO " (first event) "\n" (stamp-time (second event))))
+
+(defun generate-org-markdown (tline) ;tline is timeline
+  (setq agenda-string "")
+  (loop for event in tline do
+        (setq agenda-string (concat agenda-string "\n" (orgify-event event))))
+  )
+
+
+
+(generate-org-markdown timeline)
+
+
+(defun org-assistant/generate-timeline ()
+  
+  )
+
+
+
+
+;; SAMPLE OUTPUT
+;; * TODO Start
+;; SCHEDULED: <2022-06-27 Mon 09:00>
+;; * TODO Dog
+;; SCHEDULED: <2022-06-27 Mon 09:05>
+;; * TODO Exercise
+;; SCHEDULED: <2022-06-27 Mon 10:00>
+;; * TODO Postoffice
+;; SCHEDULED: <2022-06-27 Mon 14:00>"
+
+
+(provide 'org-assistant)
+;;; org-assistant.el ends here(i)
