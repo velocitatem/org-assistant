@@ -12,8 +12,17 @@
 ;;   (setq now_decoded (list day month year))
 ;;  )
 
-(setq user-events (list (list "Start" "00:00" "0"))
-      timeline user-events)
+(setq user-events (list (list "Start" "09:00" "0"))
+      timeline (list))
+
+; pass test data
+(setq user-events
+      (list (list "Start" "09:00" "0")
+            (list "Dog" "" "30")
+            (list "Postoffice" "14:00" "30")
+            (list "Exercise" "10:00" "45")
+            )
+      )
 
 
 (setq keep-reading t)
@@ -57,7 +66,7 @@
   )
 
 (loop for user-event in user-events do
-     (if (not (equal (first user-event) ""))
+     (if (not (= 0 (length (second user-event))))
          (timed-events/add user-event)
          (wild-events/add user-event)
          )
@@ -93,9 +102,9 @@
 (while (> (length timed-events) 0)
   (setq min-time (str-to-time "23:59")
         min-event nil)
-  (loop for event in user-events do
-        (if (= (first event) (compare-times))
-            (setq min-time (first event)
+  (loop for event in timed-events do
+        (if (equal (second event) (compare-times (second event) min-time))
+            (setq min-time (second event)
                   min-event event)))
   (timed-events/remove-item min-event)
   (setq timeline
@@ -103,26 +112,31 @@
   )
 
 
+(setq timeline (reverse timeline))
+
 ; wildcard assignment
 (setq last-wildcard 0
       event-index 0)
 (loop for event in timeline do
       (if (< event-index (- (length timeline) 1)) ; checking not to go over the last element since we need a +1 index
           (progn
+            (message (first event))
             (setq next-event (nth (+ event-index 1) timeline) ; get next event
-                  time-gap (subtract-times (first next-event) (first event)) ; calculate gap between events start-start
-                  event-end-shift (+ (cl-parse-integer (second event)) 5)) ; find then event 1 ends and add 5 minutes
+                  time-gap (subtract-times (second next-event) (second event)) ; calculate gap between events start-start
+                  time-gap (+ (* (first time-gap) 60) (second time-gap) )
+                  event-end-shift (+ (cl-parse-integer (third event)) 5)) ; find then event 1 ends and add 5 minutes
             (setq time-gap (- time-gap event-end-shift) ; subtract event duration from start-start time gap
                   selected-wildcard (nth last-wildcard wild-events))
-            (if (and (not (= selected-wildcard nil)) (< (cl-parse-integer (second selected-wildcard)) time-gap) ) ; check if wildcard duration could fit into gap
+            (if (and (not (equalp selected-wildcard nil)) (< (cl-parse-integer (third selected-wildcard)) time-gap) ) ; check if wildcard duration could fit into gap
                 (progn
                   (message "gap found") 
-                  (setq (nth 1 selected-wildcard) add-minutes-to-time((first event) event-end-shift)) 
-                  (-insert-at (+ 1 event-index) selected-wildcard timeline)
+                  (setf (nth 1 selected-wildcard) (add-minutes-to-time (second event) event-end-shift)) 
+                  (setq timeline
+                        (-insert-at (+ 1 event-index) selected-wildcard timeline)
+                        )
                   (setq last-wildcard (+ 1 last-wildcard))))
 
             (setq event-index (+ event-index 1)))
       ))
-
 
 
