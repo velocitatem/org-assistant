@@ -4,12 +4,12 @@
 
 org-assistant is a tool to help you build your org-agenda dynamically. It takes the events for each day, aswell as their category, generates a timeline and them implements that into your org agenda.
 
-* How should it work
-1. User creates a list of events and gives each event a time and duration, both can be wild-cards.
-2. Algorithm creates time-line
-   1. Starts at first event
-   2. All time-specific events are assigned
-   3. All non-time-specific events (wild-card times) are evenly distributed
-   4. Schedule is checked if it makes sense
+* How does it work?
+The algorithm prompts the user for events which he must accomplish during the day (trying to add the ability to read org agenda).
+Once it has all the data, it generates a timeline for the day.
+The beauty of it is that any event for which you do not have a set time, will be assigned a time to fit into your schedule.
 
+
+* PS
+/first time making something in lisp so please have patience with some atrocities in the code/
 
