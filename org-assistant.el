@@ -1,4 +1,4 @@
-;;; org-assistant.el --- org-assistant is a tool to help you build your org-agenda dynamically. It takes the events for each day, aswell as their category, generates a timeline and them implements that into your org agenda. -*- lexical-binding: t -*-
+;;; org-assistant.el --- org-assistant is a tool to help you build your org-agenda dynamically. It takes the events for each day, aswell as their category, generates a org-assistant-timeline and them implements that into your org agenda. -*- lexical-binding: t -*-
 
     ;; Author: Daniel Rosel
     ;; Maintainer: Daniel Rosel
@@ -36,44 +36,43 @@
   (int-to-string i))
 
 (defun read-new-event ()
-  (setq
-   event-name (read-string "Enter Event Name: ")
-   event-time (read-string (concat "When does \"" event-name "\" happen? (hh:mm) "))
-   event-duration (read-string (concat "How long does \"" event-name "\" take? (minutes) "))
-   )
-  (list event-name event-time event-duration)
+  (let ((event-name (read-string "Enter Event Name: ")))
+    (progn
+      (let ((event-time (read-string (concat "When does \"" event-name "\" happen? (hh:mm) ")))
+            (event-duration (read-string (concat "How long does \"" event-name "\" take? (minutes) "))))
+        (list event-name event-time event-duration)
+        ))
+    )
 )
 
 
-(defun str-to-time (str)
-  (setq time (split-string str ":")
-        hour (cl-parse-integer (first time))
-        minute (cl-parse-integer (second time)))
-  (list hour minute)
+(defun str-to-time (_str)
+  (let ((time (split-string _str ":")))
+    (list (cl-parse-integer (first time)) (cl-parse-integer (second time))))
   )
 
+
 (defun add-minutes-to-time (time minutes)
-  (setq hours-from-minutes (truncate
-                            (/ minutes 60))
-        remaining-minutes (% minutes 60))
-  (list  (+ hours-from-minutes (first time)) (+ remaining-minutes (second time)))
+  (let ((hours-from-minutes (truncate (/ minutes 60)))
+        (remaining-minutes (% minutes 60)))
+    (list  (+ hours-from-minutes (first time)) (+ remaining-minutes (second time))))
   )
 
 
 (defun wild-events/add (user-event)
-  (setq wild-events
-        (cons user-event wild-events)) ; TODO Maybe refactor this
+  (setq org-assistant-wild-events
+        (cons user-event org-assistant-wild-events)) ; TODO Maybe refactor this
   )
 
 (defun timed-events/add (user-event)
   (setf (nth 1 user-event) (str-to-time (nth 1 user-event)))
-  (setq timed-events
-        (cons user-event timed-events))
+  (setq org-assistant-timed-events
+        (cons user-event org-assistant-timed-events))
   )
 
 (defun timed-events/remove-item (event)
-  (setq timed-events
-        (remove event timed-events)
+  (setq org-assistant-timed-events
+        (remove event org-assistant-timed-events)
         )
   )
 
@@ -111,21 +110,23 @@
 (defun orgify-event (event)
   (concat "* TODO " (first event) "\n" (stamp-time (second event))))
 
-(defun generate-org-markdown (tline) ;tline is timeline
-  (setq agenda-string "")
-  (loop for event in tline do
-        (setq agenda-string (concat agenda-string "\n" (orgify-event event))))
-  )
+(defun generate-org-markdown (tline) ;tline is org-assistant-timeline
+  (let ((agenda-string ""))
+    (progn
+      (cl-loop for event in tline do
+               (setq agenda-string (concat agenda-string "\n" (orgify-event event))))
+      agenda-string
+      ))
+)
 
 
 
-
-
+;; dont feel like optimizing this too much lol
 (defun org-assistant/generate-timeline ()
   (interactive)
 
-  (setq user-events (list (list "Start" "09:00" "0"))
-        timeline (list))
+  (setq org-assistant-user-events (list (list "Start" "09:00" "0"))
+        org-assistant-timeline (list))
 
                                         ; SAMPLE INPUT
   ;; (setq user-events
@@ -142,18 +143,18 @@
 
                                         ; get users user-event
   (while keep-reading
-    (if (not (equal (read-string "Add new event? [y/enter]: ") "y"))
+    (if (not (equal (read-char "Add new event? [y/enter]: ") 121)) ;; 121 is char code for y
         (setq keep-reading nil)
-      (setq user-events
-            (cons (read-new-event) user-events)))
+      (setq org-assistant-user-events
+            (cons (read-new-event) org-assistant-user-events)))
     )
   (setq keep-reading t)
 
 
-  (setq timed-events (list)
-        wild-events (list))
+  (setq org-assistant-timed-events (list)
+        org-assistant-wild-events (list))
 
-  (loop for user-event in user-events do
+  (cl-loop for user-event in org-assistant-user-events do
         (if (not (= 0 (length (second user-event))))
             (timed-events/add user-event)
           (wild-events/add user-event)
@@ -162,51 +163,51 @@
 
 
   ; time specific asignment
-  (while (> (length timed-events) 0)
+  (while (> (length org-assistant-timed-events) 0)
     (setq min-time (str-to-time "23:59")
           min-event nil)
-    (loop for event in timed-events do
+    (cl-loop for event in org-assistant-timed-events do
           (if (equal (second event) (compare-times (second event) min-time))
               (setq min-time (second event)
                     min-event event)))
     (timed-events/remove-item min-event)
-    (setq timeline
-          (cons min-event timeline))
+    (setq org-assistant-timeline
+          (cons min-event org-assistant-timeline))
     )
 
 
-  (setq timeline (reverse timeline))
+  (setq org-assistant-timeline (reverse org-assistant-timeline))
 
-  ; wildcard assignment
-  (setq last-wildcard 0
-        event-index 0)
-  (loop for event in timeline do
-        (if (< event-index (- (length timeline) 1)) ; checking not to go over the last element since we need a +1 index
+  ;; wildcard assignment
+  ;; This could be a let
+  (setq org-assistant-last-wildcard 0
+        org-assistant-event-index 0)
+  (cl-loop for event in org-assistant-timeline do
+        (if (< org-assistant-event-index (- (length org-assistant-timeline) 1)) ; checking not to go over the last element since we need a +1 index
             (progn
               (message (first event))
-              (setq next-event (nth (+ event-index 1) timeline) ; get next event
+              (setq next-event (nth (+ org-assistant-event-index 1) org-assistant-timeline) ; get next event
                     time-gap (subtract-times (second next-event) (second event)) ; calculate gap between events start-start
                     time-gap (+ (* (first time-gap) 60) (second time-gap) )
                     event-end-shift (+ (cl-parse-integer (third event)) 5)) ; find then event 1 ends and add 5 minutes
               (setq time-gap (- time-gap event-end-shift) ; subtract event duration from start-start time gap
-                    selected-wildcard (nth last-wildcard wild-events))
+                    selected-wildcard (nth org-assistant-last-wildcard wild-events))
               (if (and (not (equalp selected-wildcard nil)) (< (cl-parse-integer (third selected-wildcard)) time-gap) ) ; check if wildcard duration could fit into gap
                   (progn
                     (message "gap found") 
                     (setf (nth 1 selected-wildcard) (add-minutes-to-time (second event) event-end-shift)) 
-                    (setq timeline
-                          (-insert-at (+ 1 event-index) selected-wildcard timeline)
+                    (setq org-assistant-timeline
+                          (-insert-at (+ 1 org-assistant-event-index) selected-wildcard org-assistant-timeline)
                           )
-                    (setq last-wildcard (+ 1 last-wildcard))))
+                    (setq org-assistant-last-wildcard (+ 1 org-assistant-last-wildcard))))
 
-              (setq event-index (+ event-index 1)))
+              (setq org-assistant-event-index (+ org-assistant-event-index 1)))
         ))
-  (generate-org-markdown timeline) ;; last step
+  (generate-org-markdown org-assistant-timeline) ;; last step
 
   )
 
 
-()
 
 
 (provide 'org-assistant)
