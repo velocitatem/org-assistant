@@ -30,6 +30,7 @@
 ;;; Code:
 
 
+(defvar org-assistant-files-path (first org-agenda-files))
 
 
 (defun its (i)
@@ -207,7 +208,21 @@
 
   )
 
+(defun org-assistant/setup ()
+  ;; TODO Define directory, add directory to org-agenda-files
+  )
 
+(defun org-assistant/export-to-file (markdown)
+  (let ((file-name (concat (format-time-string "oas-%Y%m%d-%H%M") ".org")))
+    (progn
+      ;; this feels wrong
+      (generate-new-buffer file-name)
+      (switch-to-buffer-other-window file-name)
+      (insert markdown)
+      (write-file file-name)
+      ))
+  )
+(org-assistant/export-to-file (generate-org-markdown org-assistant-timeline))
 
 
 (provide 'org-assistant)

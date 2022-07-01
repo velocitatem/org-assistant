@@ -13,10 +13,11 @@ The beauty of it is that any event for which you do not have a set time, will be
 * PS
 /first time making something in lisp so please have patience with some atrocities in the code/
 
-* TODO org-assistant [/]
-+ [ ] export final agenda-string to a file
+* TODO org-assistant [3/6]
++ [X] export final agenda-string to a file
++ [ ] Comment and document functions
 + [ ] Read events from org-agenda
 + [ ] Make into an official package
-+ [ ] Improve variable naming
-+ [ ] read-character for decisions
++ [X] Improve variable naming
++ [X] read-character for decisions
 
