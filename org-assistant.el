@@ -192,7 +192,7 @@
                     time-gap (+ (* (first time-gap) 60) (second time-gap) )
                     event-end-shift (+ (cl-parse-integer (third event)) 5)) ; find then event 1 ends and add 5 minutes
               (setq time-gap (- time-gap event-end-shift) ; subtract event duration from start-start time gap
-                    selected-wildcard (nth org-assistant-last-wildcard wild-events))
+                    selected-wildcard (nth org-assistant-last-wildcard org-assistant-wild-events))
               (if (and (not (equalp selected-wildcard nil)) (< (cl-parse-integer (third selected-wildcard)) time-gap) ) ; check if wildcard duration could fit into gap
                   (progn
                     (message "gap found") 
